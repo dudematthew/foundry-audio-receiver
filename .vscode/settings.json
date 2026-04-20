@@ -1,0 +1,15 @@
+{
+	"triggerTaskOnSave.tasks": {
+		"watch: reload": ["src/**/*.js"]
+	},
+	"triggerTaskOnSave.showStatusBarToggle": true,
+	"launches": {
+		"fvtt-debug": "FoundryVTT"
+	},
+	"launch-config.ifDebugSessionRunning": "restart",
+	"editor.tabSize": 4,
+	"editor.detectIndentation": false,
+	"editor.formatOnPaste": true,
+	"editor.formatOnSave": true,
+	"editor.formatOnSaveMode": "modifications"
+}

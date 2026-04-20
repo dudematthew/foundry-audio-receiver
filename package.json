@@ -1,0 +1,25 @@
+{
+  "private": true,
+  "name": "foundry-audio-receiver",
+  "version": "0.1.0",
+  "description": "FoundryVTT module development workspace (build/link/package).",
+  "scripts": {
+    "package": "gulp package",
+    "build": "gulp build && gulp link",
+    "clean": "gulp clean && gulp link --clean",
+    "link": "gulp link"
+  },
+  "author": "dudematthew",
+  "license": "MIT",
+  "devDependencies": {
+    "archiver": "^5.3.0",
+    "chalk": "^4.1.1",
+    "electron": "^36.1.0",
+    "fs-extra": "^11.1.0",
+    "gulp": "^4.0.2",
+    "gulp-less": "^4.0.1",
+    "json-stringify-pretty-compact": "^2.0.0",
+    "yargs": "^16.0.3",
+    "xhr2": "^0.2.1"
+  }
+}

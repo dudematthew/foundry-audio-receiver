@@ -1,0 +1,7 @@
+{
+    "recommendations": [
+        "dbaeumer.vscode-eslint",
+        "gruntfuggly.triggertaskonsave",
+        "ArturoDent.launch-config"
+    ]
+}

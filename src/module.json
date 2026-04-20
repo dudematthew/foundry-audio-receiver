@@ -1,0 +1,13 @@
+{
+    "id": "foundry-audio-receiver",
+    "title": "Foundry Audio Receiver",
+    "description": "Receives external audio streams and exposes a simple in-Foundry player.",
+    "version": "0.1.0",
+    "compatibility": { "minimum": "13", "verified": "13" },
+    "authors": [
+        {
+            "name": "dudematthew"
+        }
+    ],
+    "esmodules": ["main.js"]
+}
