@@ -353,11 +353,9 @@ export async function stopStream() {
 	_userWantsPlayback = false;
 	clearReconnectTimer();
 	_reconnectAttempt = 0;
-	if (!_sound) {
-		notifyPanel();
-		return;
-	}
-	await _sound.stop({ fade: 0 });
+	// Cancel must not wait on in-flight work: during unlock/load there may be no `_sound` yet, but
+	// `_attemptInFlight` is already true — the old early-return left the panel stuck until awaits finished.
+	_attemptInFlight = false;
 	disposeSound();
 	notifyPanel();
 }

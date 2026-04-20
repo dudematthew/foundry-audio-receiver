@@ -78,6 +78,13 @@
   pointer-events: none;
 }
 
+/* Match non-interactive connecting state: no hover highlight when actions are unavailable */
+.far-playlist-panel.global-control .far-playlist-controls .far-icon-btn:disabled {
+  pointer-events: none;
+  cursor: default;
+  opacity: 0.45;
+}
+
 /* Fallback when global volume list is missing */
 .foundry-audio-receiver-global-volume-row:not(li) {
   display: flex;
