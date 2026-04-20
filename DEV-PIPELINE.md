@@ -18,7 +18,8 @@ Everything is driven by `package.json` scripts and `gulpfile.js`.
 - `src/module.json`: Foundry manifest. Its `"id"` becomes the folder name under `Data/modules/`.
 - `src/main.js`: module entry point (listed in `src/module.json` → `"esmodules"`).
 - `foundryconfig.json`: points the pipeline at your Foundry User Data root.
-- `gulpfile.js`: implements build/link/package tasks.
+- `gulpfile.js`: implements build/link/package tasks (Less, Handlebars panel → `src/generated/render-audio-receiver-panel.js`).
+- `templates/*.hbs`: Handlebars sources; run `npm run compile:hbs` or full `npm run build` after editing them.
 - `package/`: created by packaging. Contains the built `.zip`.
 
 ## Configure Foundry User Data path

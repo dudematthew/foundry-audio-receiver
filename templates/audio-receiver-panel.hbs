@@ -1,0 +1,25 @@
+<header class="far-audio-receiver-header" role="button" tabindex="0" aria-expanded="true" aria-label="{{expandSectionAria}}">
+  <i class="expand fa-solid fa-angle-up" inert=""></i>
+  <strong>{{title}}</strong>
+</header>
+<div class="expandable">
+  <div class="wrapper">
+    <div class="far-playlist-controls">
+      <button type="button" name="far-play" class="far-icon-btn" title="{{playTitle}}" aria-label="{{playAria}}">
+        <i class="fas fa-play"></i>
+      </button>
+      <button type="button" name="far-stop" class="far-icon-btn" title="{{stopTitle}}" aria-label="{{stopAria}}">
+        <i class="fas fa-stop"></i>
+      </button>
+    </div>
+    <div class="far-playlist-options">
+      <label class="far-follow-label">
+        <input type="checkbox" name="far-use-global-stream" checked />
+        <span>{{useGlobalStream}}</span>
+      </label>
+      <div class="far-custom-url-wrap">
+        <input type="url" name="far-custom-url" class="far-custom-url" placeholder="{{customUrlPlaceholder}}" />
+      </div>
+    </div>
+  </div>
+</div>

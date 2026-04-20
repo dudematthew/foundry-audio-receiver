@@ -1,4 +1,7 @@
 import { MODULE_ID, SETTINGS } from "./constants.js";
+import { renderAudioReceiverPanelShell } from "./generated/render-audio-receiver-panel.js";
+import { getAudioReceiverPanelShellContext } from "./panel/audio-receiver-panel-context.js";
+import { syncTransportButtons } from "./panel/transport-button-view.js";
 import { syncGlobalStreamVolumeRow } from "./playlist-global-volume.js";
 import { t } from "./i18n.js";
 import {
@@ -36,53 +39,15 @@ function syncPanelState(root) {
 		customInput.disabled = useGlobal;
 	}
 
-	const playBtn = root.querySelector('button[name="far-play"]');
-	const stopBtn = root.querySelector('button[name="far-stop"]');
-	const playIcon = playBtn?.querySelector("i");
-	const stopIcon = stopBtn?.querySelector("i");
-
-	if (playBtn instanceof HTMLButtonElement) {
-		if (waitingForStream) {
-			playBtn.classList.add("far-play-cancel");
-			playBtn.title = t("panel.cancelConnect");
-			playBtn.setAttribute("aria-label", t("panel.cancelConnect"));
-			playBtn.disabled = false;
-			if (playIcon) {
-				playIcon.className = "fas fa-times";
-			}
-		} else {
-			playBtn.classList.remove("far-play-cancel");
-			playBtn.title = t("panel.play");
-			playBtn.setAttribute("aria-label", t("panel.play"));
-			if (playIcon) {
-				playIcon.className = "fas fa-play";
-			}
-			playBtn.disabled = playing || !getEffectiveStreamUrl();
-		}
-	}
-
-	if (stopBtn instanceof HTMLButtonElement) {
-		if (waitingForStream) {
-			stopBtn.disabled = true;
-			stopBtn.classList.add("far-stop-connecting");
-			stopBtn.title = t("panel.connecting");
-			stopBtn.setAttribute("aria-label", t("panel.connecting"));
-			stopBtn.setAttribute("aria-busy", "true");
-			if (stopIcon) {
-				stopIcon.className = "fas fa-spinner fa-spin";
-			}
-		} else {
-			stopBtn.classList.remove("far-stop-connecting");
-			stopBtn.removeAttribute("aria-busy");
-			const canStop = playing;
-			stopBtn.disabled = !canStop;
-			stopBtn.title = t("panel.stop");
-			stopBtn.setAttribute("aria-label", t("panel.stop"));
-			if (stopIcon) {
-				stopIcon.className = "fas fa-stop";
-			}
-		}
-	}
+	syncTransportButtons(
+		root,
+		{
+			waitingForStream,
+			playing,
+			hasUrl: Boolean(getEffectiveStreamUrl()),
+		},
+		t,
+	);
 }
 
 /**
@@ -165,33 +130,7 @@ function buildPanel() {
 	root.id = PANEL_ID;
 	root.className = "global-control far-playlist-panel expanded";
 	root.setAttribute("aria-label", t("panel.ariaLabel"));
-	root.innerHTML = `
-  <header class="far-audio-receiver-header" role="button" tabindex="0" aria-expanded="true" aria-label="${t("panel.expandSection")}">
-    <i class="expand fa-solid fa-angle-up" inert=""></i>
-    <strong>${t("panel.title")}</strong>
-  </header>
-  <div class="expandable">
-    <div class="wrapper">
-      <div class="far-playlist-controls">
-        <button type="button" name="far-play" class="far-icon-btn" title="${t("panel.play")}" aria-label="${t("panel.play")}">
-          <i class="fas fa-play"></i>
-        </button>
-        <button type="button" name="far-stop" class="far-icon-btn" title="${t("panel.stop")}" aria-label="${t("panel.stop")}">
-          <i class="fas fa-stop"></i>
-        </button>
-      </div>
-      <div class="far-playlist-options">
-        <label class="far-follow-label">
-          <input type="checkbox" name="far-use-global-stream" checked />
-          <span>${t("panel.useGlobalStream")}</span>
-        </label>
-        <div class="far-custom-url-wrap">
-          <input type="url" name="far-custom-url" class="far-custom-url" placeholder="${t("panel.customUrlPlaceholder")}" />
-        </div>
-      </div>
-    </div>
-  </div>
-`;
+	root.innerHTML = renderAudioReceiverPanelShell(getAudioReceiverPanelShellContext());
 	return root;
 }
 

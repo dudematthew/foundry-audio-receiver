@@ -10,6 +10,7 @@ const XMLHttpRequest = require('xhr2');
 const less = require('gulp-less');
 
 const argv = require('yargs').argv;
+const { execSync } = require('child_process');
 
 /**
  * Base config from foundryconfig.json, overridden by optional foundryconfig.local.json (gitignored).
@@ -55,6 +56,19 @@ function buildLess() {
 		src('src/styles/*.less')
 		.pipe(less())
 		.pipe(gulp.dest('src/'));
+}
+
+/**
+ * Precompile `templates/audio-receiver-panel.hbs` and bundle Handlebars runtime (esbuild) into
+ * `src/generated/render-audio-receiver-panel.js` for Foundry ESM import (no node_modules in zip).
+ */
+function compilePanelHandlebars(done) {
+	try {
+		execSync('node scripts/compile-panel-hbs.mjs', { cwd: __dirname, stdio: 'inherit' });
+		done();
+	} catch (e) {
+		done(e);
+	}
 }
 
 /********************/
@@ -231,8 +245,9 @@ async function packageBuild() {
 	});
 }
 
-exports.build = gulp.series(clean, buildLess);
+exports.build = gulp.series(clean, buildLess, compilePanelHandlebars);
 exports.buildLess = buildLess;
+exports.compilePanelHandlebars = compilePanelHandlebars;
 exports.clean = clean;
 exports.link = linkUserData;
 exports.package = gulp.series(exports.build, packageBuild);
