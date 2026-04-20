@@ -1,6 +1,7 @@
 ## Custom ignores
 generate-docs.bat
 deploytoken.json
+foundryconfig.local.json
 
 # Generated PDF files
 *.pdf

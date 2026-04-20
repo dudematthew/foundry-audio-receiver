@@ -11,6 +11,19 @@ const less = require('gulp-less');
 
 const argv = require('yargs').argv;
 
+/**
+ * Base config from foundryconfig.json, overridden by optional foundryconfig.local.json (gitignored).
+ */
+function getFoundryConfig() {
+	const basePath = path.resolve('.', 'foundryconfig.json');
+	const localPath = path.resolve('.', 'foundryconfig.local.json');
+	const base = fs.readJSONSync(basePath);
+	if (fs.existsSync(localPath)) {
+		return { ...base, ...fs.readJSONSync(localPath) };
+	}
+	return base;
+}
+
 function getManifest() {
 	const json = { root: 'src' };
 
@@ -109,7 +122,7 @@ async function linkOrCopyDir(srcDir, destDir) {
 }
 
 async function linkUserData() {
-	const config = fs.readJSONSync('foundryconfig.json');
+	const config = getFoundryConfig();
 
 	let destDir, name;
 	try {
@@ -130,7 +143,7 @@ async function linkUserData() {
 			let appDataPath = process.env.AppData;
 			let resolvedDataPath;
 			if (!appDataPath) {
-				console.warn(chalk.yellow("Can't auto-resolve data path, make sure to set an absolute path in foundryconfig.json > dataPath."));
+				console.warn(chalk.yellow("Can't auto-resolve data path, set an absolute path in foundryconfig.json (or foundryconfig.local.json) > dataPath."));
 				resolvedDataPath = config.dataPath;
 			} else {
 				let localAppDataPath = appDataPath.replace("Roaming", "Local");
@@ -141,7 +154,7 @@ async function linkUserData() {
 
 			linkDir = path.join(resolvedDataPath, 'Data', destDir, name);
 		} else {
-			throw Error('No User Data path defined in foundryconfig.json');
+			throw Error('No User Data path defined in foundryconfig.json / foundryconfig.local.json');
 		}
 
 		if (argv.clean || argv.c) {

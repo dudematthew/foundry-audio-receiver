@@ -1,0 +1,22 @@
+# Caddy does NOT replace SWYH — it reverse-proxies to it and adds CORS headers.
+# That means that connection to Caddy will be forwarded to SWYH.
+#
+# Layout (recommended): browsers only talk to Caddy on 5901; SWYH listens on 5910.
+#   1. In SWYH, set its HTTP streaming port to 5910 (free up 5901 for Caddy).
+#   2. Run Caddy with this file. It binds :5901 and forwards to 127.0.0.1:5910.
+#   3. In Foundry use: http://<host>:5901/stream/swyh.mp3 (same path SWYH would use).
+#
+# You can always connect to Caddy via other IP addresses, but then you need to change the Access-Control-Allow-Origin header to that IP address (if you aren't using *).
+#
+# If you prefer SWYH to stay on 5901 instead, swap the two port numbers below and
+# pick a different Caddy listen port (e.g. :5910).
+
+:5901 {
+	reverse_proxy 127.0.0.1:5910 {
+		flush_interval -1
+		# header_down Access-Control-Allow-Origin "http://localhost:30000"
+		header_down Access-Control-Allow-Origin "*"
+		header_down Access-Control-Allow-Methods "GET, HEAD, OPTIONS"
+		header_down Access-Control-Allow-Headers "*"
+	}
+}

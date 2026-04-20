@@ -9,5 +9,25 @@
             "name": "dudematthew"
         }
     ],
-    "esmodules": ["main.js"]
+    "esmodules": ["main.js"],
+    "styles": ["styles/audio-receiver.css"],
+    "languages": [
+        {
+            "lang": "en",
+            "name": "English",
+            "path": "lang/en.json"
+        },
+        {
+            "lang": "pl",
+            "name": "Polski",
+            "path": "lang/pl.json"
+        }
+    ],
+    "socket": true,
+    "flags": {
+        "hotReload": {
+            "extensions": ["css", "json"],
+            "paths": ["styles", "lang"]
+        }
+    }
 }
