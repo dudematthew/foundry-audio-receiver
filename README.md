@@ -44,14 +44,14 @@ There’s an **Audio receiver** block you can expand. **Play** / **Stop**, toggl
 ## What you do (setup)
 
 1. **Get a working stream URL** from something on your PC or network (MP3-style stream is typical). This module does not encode audio; it only plays the URL inside Foundry.
-2. **Test the URL in VLC** (Media → Open Network Stream). If VLC will not play it, Foundry will not either.
+2. **Test the URL in your browser** (Paste the link and play the audio). If your browser will not play it, Foundry will not either. CORS issue may still be a problem. 
 3. In Foundry: **Configure Settings → module settings → World → Global stream URL** and paste the URL. Players can follow that or set their own in the **Playlists → Audio receiver** block.
 4. **If players are remote:** your source must be reachable at that URL (firewall, port forward, or a tunnel). The module does not punch holes in your router.
 
 **Typical paths**
 
 - **Stream What You Hear (Windows):** install SWYH, start streaming, copy the stream URL it shows. If the browser blocks cross-origin requests, add a proxy so Foundry and the stream share one origin — follow `contrib/swyh-caddy-proxy/` and point the world URL at the proxied address. (If you are using another source, you can use a similar proxy.)
-- **Icecast / SHOUTcast:** run the server, create a mount, send audio with a source client. Use the mount URL in Foundry, e.g. `http://yourhost:8000/stream` (your real host/port/mount).
+- **Icecast / SHOUTcast:** run the server, create a mount, send audio with a source client. Use the mount URL in Foundry, e.g. `http://yourhost:8000/stream` (your real host/port/mount). Icecast will not have CORS issues. 
 
 ---
 
@@ -76,7 +76,7 @@ Install from the package list, or copy this folder to `Data/modules/foundry-audi
 | Tool | What to use it for |
 |------|-----------|
 | [Stream What You Hear](http://www.streamwhatyouhear.com/) | Capture desktop/system audio on Windows and expose a stream URL. |
-| [VLC](https://www.videolan.org/) | Verify the stream URL before pasting it into Foundry. |
+| [VLC](https://www.videolan.org/) | You can verify the stream URL before pasting it into Foundry. |
 | [Caddy](https://caddyserver.com/) | Reverse-proxy the stream so it matches Foundry's origin and avoids CORS; see `contrib/swyh-caddy-proxy/`. |
 | [Icecast](https://icecast.org/) | Run a small streaming server; point Foundry at the mount URL. |
 | [butt](https://danielnoethen.de/butt/) | Send audio from a mic/app into Icecast (or similar). |
