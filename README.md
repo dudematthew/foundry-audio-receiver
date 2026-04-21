@@ -18,6 +18,8 @@ The GM can set the **world stream URL**, and players either follow that or paste
 
 There’s an **Audio receiver** block you can expand. **Play** / **Stop**, toggle **Use global stream URL**, or paste **your own URL** right below. Then there’s a **Stream** volume slider for changing the audio volume.
 
+![Playlists tab](./Playlist.png)
+
 ### Configure Settings → module settings
 
 **World**
