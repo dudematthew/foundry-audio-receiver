@@ -12,7 +12,7 @@ The GM can set the **world stream URL**, and players either follow that or paste
 
 ---
 
-## Where everything lives
+## How does it work?
 
 ### Playlists tab
 
