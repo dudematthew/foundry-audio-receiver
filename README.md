@@ -1,14 +1,14 @@
 # Foundry Audio Receiver
 
-If you remember **[Fryke’s Music Streamer](https://foundryvtt.com/packages/music-streamer)** - that little floating player that let you pipe a live stream straight into Foundry - this module carries that idea into **Foundry v13**. Your encoder stays *outside* Foundry (Winamp, SWYH, Icecast, whatever you run); the table just needs a URL.
+As with the **[Fryke’s Music Streamer](https://foundryvtt.com/packages/music-streamer)** - little floating player that let you pipe a live stream straight into Foundry - this module carries that idea into **Foundry v13**. You can stream your audio from *outside* Foundry (Winamp, SWYH, Icecast, whatever you run).
 
 ---
 
 ## Why bother?
 
-Foundry’s built-in audio is great for ambience and playlists, but sometimes you want **one continuous feed** - your DJ app, a SWYH loop, an Icecast mount - without wrestling the playlist UI. This module is the Foundry-side player for that.
+Foundry’s built-in audio is great for ambience and playlists, but sometimes you want **one continuous feed** - your youtube audio, or any other audio programs on your computer - without wrestling the playlist UI. This module is the Foundry-side player for that.
 
-The GM can set the **world stream URL**, and players either follow that or paste their own. When the GM changes it, everyone on the global setting gets the update through the usual Foundry settings sync. **No extra socket tricks** - it’s just how world settings work.
+The GM can set the **world stream URL**, and players either follow that or paste their own. When the GM changes it, everyone on the global setting gets the update.
 
 ---
 
@@ -16,13 +16,14 @@ The GM can set the **world stream URL**, and players either follow that or paste
 
 ### Playlists tab
 
-There’s an **Audio receiver** block you can expand. **Play** / **Stop**, toggle **Use global stream URL**, or paste **your own URL** right below. Then there’s a **Stream** volume slider: it sits with the other global volume rows, and it only affects the stream.
+There’s an **Audio receiver** block you can expand. **Play** / **Stop**, toggle **Use global stream URL**, or paste **your own URL** right below. Then there’s a **Stream** volume slider for changing the audio volume.
+
 ### Configure Settings → module settings
 
 **World**
 
 - **Global stream URL**
-- **Stream volume multiplier** - defaults to **×2** so quieter sources (e.g. SWYH) don’t disappear in the mix. Drop it to **1** if your encoder is already loud enough.
+- **Stream volume multiplier** - defaults to **×2** so quieter sources (e.g. SWYH) don’t disappear in the mix. Drop it to **1** if your source is already loud enough.
 
 **Per user**
 
@@ -32,7 +33,7 @@ There’s an **Audio receiver** block you can expand. **Play** / **Stop**, toggl
 
 ### Behaviour
 
-- **Reconnect:** if the stream drops (common when nothing is playing into the encoder), the module retries with backoff.
+- **Reconnect:** if the stream drops (common when nothing is playing into the source), the module retries with backoff.
 - **Volume:** there is **no** automatic loudness fix. Use **Configure Settings → module → Stream volume multiplier** plus the **Stream** slider in Playlists until it sounds right.
 - **CORS:** the game runs in a browser. If the stream URL is on another host/port than Foundry, the browser may block it. Open **DevTools (F12) → Console** and look for CORS errors. To put the stream behind the same origin as Foundry, use a reverse proxy; there is a **Caddy** example in `contrib/swyh-caddy-proxy/`.
 
@@ -40,14 +41,14 @@ There’s an **Audio receiver** block you can expand. **Play** / **Stop**, toggl
 
 ## What you do (setup)
 
-1. **Get a working HTTP stream URL** from something on your PC or network (MP3-style stream is typical). This module does not encode audio; it only plays the URL inside Foundry.
+1. **Get a working stream URL** from something on your PC or network (MP3-style stream is typical). This module does not encode audio; it only plays the URL inside Foundry.
 2. **Test the URL in VLC** (Media → Open Network Stream). If VLC will not play it, Foundry will not either.
 3. In Foundry: **Configure Settings → module settings → World → Global stream URL** and paste the URL. Players can follow that or set their own in the **Playlists → Audio receiver** block.
-4. **If players are remote:** your encoder must be reachable at that URL (firewall, port forward, or a tunnel). The module does not punch holes in your router.
+4. **If players are remote:** your source must be reachable at that URL (firewall, port forward, or a tunnel). The module does not punch holes in your router.
 
 **Typical paths**
 
-- **Stream What You Hear (Windows):** install SWYH, start streaming, copy the stream URL it shows. If the browser blocks cross-origin requests, add a proxy so Foundry and the stream share one origin — follow `contrib/swyh-caddy-proxy/` and point the world URL at the proxied address.
+- **Stream What You Hear (Windows):** install SWYH, start streaming, copy the stream URL it shows. If the browser blocks cross-origin requests, add a proxy so Foundry and the stream share one origin — follow `contrib/swyh-caddy-proxy/` and point the world URL at the proxied address. (If you are using another source, you can use a similar proxy.)
 - **Icecast / SHOUTcast:** run the server, create a mount, send audio with a source client. Use the mount URL in Foundry, e.g. `http://yourhost:8000/stream` (your real host/port/mount).
 
 ---
@@ -78,5 +79,3 @@ Install from the package list, or copy this folder to `Data/modules/foundry-audi
 | [Icecast](https://icecast.org/) | Run a small streaming server; point Foundry at the mount URL. |
 | [butt](https://danielnoethen.de/butt/) | Send audio from a mic/app into Icecast (or similar). |
 | [ngrok](https://ngrok.com/) | Expose a local stream URL to the internet with a public HTTPS URL (optional for remote players). |
-
-Same idea as the old [Music Streamer](https://foundryvtt.com/packages/music-streamer): Foundry needs **a URL that actually streams**; encoding and networking are on you.
