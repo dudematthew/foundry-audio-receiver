@@ -18,6 +18,7 @@ Everything is driven by `package.json` scripts and `gulpfile.js`.
 - `src/module.json`: Foundry manifest. Its `"id"` becomes the folder name under `Data/modules/`.
 - `src/main.js`: module entry point (listed in `src/module.json` → `"esmodules"`).
 - `foundryconfig.json`: points the pipeline at your Foundry User Data root.
+- `foundryconfig.local.json` (optional, gitignored): overrides `foundryconfig.json` on your machine (recommended for local paths/URLs).
 - `gulpfile.js`: implements build/link/package tasks (Less, Handlebars panel → `src/generated/render-audio-receiver-panel.js`).
 - `templates/*.hbs`: Handlebars sources; run `npm run compile:hbs` or full `npm run build` after editing them.
 - `package/`: created by packaging. Contains the built `.zip`.
@@ -28,6 +29,7 @@ Edit `foundryconfig.json`:
 
 - `"dataPath"` must point at the **Foundry user data root** (the folder that contains `Data/`)
 - You can use the default placeholder: `"${env:AppData}/FoundryVTT/"`
+- `"repository"` is optional, but if you set it to your GitHub repo (e.g. `owner/repo`), the version task can generate `manifest`/`download` URLs automatically.
 
 ### How `${env:AppData}` is resolved
 
@@ -87,6 +89,42 @@ Output:
 - `package/<moduleId>-v<version>.zip`
 
 The zip contains a single top-level folder named after the manifest `"id"` (what Foundry expects).
+
+## Versioning / release prep (GitHub, no publishing yet)
+
+This repo includes a **prep-only** release flow:
+
+- updates `src/module.json` version
+- updates `package.json` version (so zip name stays in sync)
+- creates a local git tag `vX.Y.Z`
+- runs the normal packaging step
+
+Bump version only:
+
+```powershell
+npm run createVersion -- --bump patch
+```
+
+Or set an explicit version:
+
+```powershell
+npm run createVersion -- --version 0.1.0
+```
+
+Build + package after bumping (recommended):
+
+```powershell
+npm run release -- --bump patch
+```
+
+### About `manifest` / `download` fields
+
+If `foundryconfig.json` (or `foundryconfig.local.json`) has `"repository"` set to a GitHub repo, `createVersion` will write:
+
+- `manifest`: `https://raw.githubusercontent.com/<owner>/<repo>/vX.Y.Z/src/module.json`
+- `download`: `https://github.com/<owner>/<repo>/releases/download/vX.Y.Z/<moduleId>-vX.Y.Z.zip`
+
+These URLs are correct **once you actually create GitHub Releases** and upload the zip. Until then, it’s fine if you leave `"repository"` empty.
 
 ## How the link step works (important)
 
