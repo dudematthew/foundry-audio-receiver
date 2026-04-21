@@ -1,7 +1,7 @@
 {
     "id": "foundry-audio-receiver",
     "title": "Foundry Audio Receiver",
-    "description": "Receives external audio streams and exposes a simple in-Foundry player.",
+    "description": "Play an external stream URL from the Playlists sidebar; world URL, gain multiplier, and per-user Stream volume.",
     "version": "0.1.0",
     "compatibility": { "minimum": "13", "verified": "13" },
     "authors": [

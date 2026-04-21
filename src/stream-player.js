@@ -1,8 +1,9 @@
 import {
 	MODULE_ID,
 	SETTINGS,
-	STREAM_FORMAT,
-	HTTP_STREAM_GAIN_MULTIPLIER,
+	DEFAULT_STREAM_GAIN_MULTIPLIER,
+	STREAM_GAIN_MULTIPLIER_RANGE,
+	SLOW_FETCH_HINT_MS,
 } from "./constants.js";
 
 /** @type {foundry.audio.Sound | null} */
@@ -26,6 +27,11 @@ let _playbackGen = 0;
 let _playbackQueue = Promise.resolve();
 /** True during an enqueued run (for UI: spinner on stop). */
 let _attemptInFlight = false;
+
+/** @type {ReturnType<typeof setTimeout> | null} */
+let _slowFetchHintTimer = null;
+/** True after {@link SLOW_FETCH_HINT_MS} while still connecting with no playback yet. */
+let _showSlowFetchHint = false;
 
 /** @type {{ el: HTMLAudioElement; onError: () => void; onEnded: () => void } | null} */
 let _mediaListeners = null;
@@ -52,6 +58,30 @@ function notifyPanel() {
 	} catch (_) {
 		/* ignore */
 	}
+}
+
+function clearSlowFetchHintTimer() {
+	if (_slowFetchHintTimer != null) {
+		clearTimeout(_slowFetchHintTimer);
+		_slowFetchHintTimer = null;
+	}
+}
+
+function scheduleSlowFetchHintTimer() {
+	clearSlowFetchHintTimer();
+	_showSlowFetchHint = false;
+	_slowFetchHintTimer = setTimeout(() => {
+		_slowFetchHintTimer = null;
+		if (_attemptInFlight && !_sound?.playing) {
+			_showSlowFetchHint = true;
+			notifyPanel();
+		}
+	}, SLOW_FETCH_HINT_MS);
+}
+
+function clearSlowFetchUiState() {
+	clearSlowFetchHintTimer();
+	_showSlowFetchHint = false;
 }
 
 function clearReconnectTimer() {
@@ -104,16 +134,7 @@ function handleStreamUnavailable() {
 	if (!_userWantsPlayback) {
 		return;
 	}
-	detachMediaListeners();
-	if (_sound) {
-		try {
-			void _sound.stop({ fade: 0 });
-		} catch (_) {
-			/* ignore */
-		}
-		_sound = null;
-	}
-	_loadedSrc = "";
+	disposeSound();
 	_reconnectAttempt = Math.min(_reconnectAttempt + 1, 24);
 	scheduleReconnect();
 	notifyPanel();
@@ -162,17 +183,13 @@ async function runPlaybackAttempt(opts) {
 	}
 
 	_attemptInFlight = true;
+	scheduleSlowFetchHintTimer();
 	notifyPanel();
 
 	try {
 		await ensureReceiverAudioReady();
 		if (myGen !== _playbackGen || !_userWantsPlayback) {
 			return;
-		}
-
-		const fmt = getStreamFormat();
-		if (fmt === STREAM_FORMAT.SHOUT) {
-			/* same path for now */
 		}
 
 		if (_sound?.playing && _loadedSrc === url) {
@@ -197,7 +214,7 @@ async function runPlaybackAttempt(opts) {
 		}
 
 		attachMediaListeners(_sound);
-		_ignoreMediaDropUntil = Date.now() + 800;
+		_ignoreMediaDropUntil = Date.now() + 500;
 		await _sound.play({ loop: true, volume: 1 });
 		if (myGen !== _playbackGen || !_userWantsPlayback) {
 			return;
@@ -217,6 +234,7 @@ async function runPlaybackAttempt(opts) {
 			scheduleReconnect();
 		}
 	} finally {
+		clearSlowFetchUiState();
 		_attemptInFlight = false;
 		notifyPanel();
 	}
@@ -279,12 +297,20 @@ export function getEffectiveStreamUrl() {
 	return String(game.settings.get(MODULE_ID, SETTINGS.customStreamUrl) ?? "").trim();
 }
 
-/**
- * @returns {'http' | 'shout'}
- */
-export function getStreamFormat() {
-	const fmt = game.settings.get(MODULE_ID, SETTINGS.streamFormat);
-	return fmt === STREAM_FORMAT.SHOUT ? STREAM_FORMAT.SHOUT : STREAM_FORMAT.HTTP;
+/** @param {foundry.audio.Sound} sound */
+function stripUnderlyingMediaElement(sound) {
+	const el = sound.element;
+	if (!(el instanceof HTMLAudioElement)) {
+		return;
+	}
+	try {
+		el.pause();
+		el.src = "about:blank";
+		el.srcObject = null;
+		el.load();
+	} catch (_) {
+		/* ignore */
+	}
 }
 
 function disposeSound() {
@@ -295,6 +321,7 @@ function disposeSound() {
 		} catch (_) {
 			/* ignore */
 		}
+		stripUnderlyingMediaElement(_sound);
 		_sound = null;
 	}
 	_loadedSrc = "";
@@ -308,14 +335,21 @@ function getReceiverVolume() {
 }
 
 function receiverGainMultiplier() {
-	return getStreamFormat() === STREAM_FORMAT.HTTP ? HTTP_STREAM_GAIN_MULTIPLIER : 1;
+	const raw = Number(game.settings.get(MODULE_ID, SETTINGS.streamGainMultiplier));
+	const m = Number.isFinite(raw) ? raw : DEFAULT_STREAM_GAIN_MULTIPLIER;
+	return Math.clamp(
+		m,
+		STREAM_GAIN_MULTIPLIER_RANGE.min,
+		STREAM_GAIN_MULTIPLIER_RANGE.max,
+	);
 }
 
 /**
  * @param {number} setting01 0–1 from setting or slider
  */
 function toReceiverGain(setting01) {
-	return Math.clamp(Number(setting01) || 0, 0, 1) * receiverGainMultiplier();
+	const linear = Math.clamp(Number(setting01) || 0, 0, 1);
+	return linear * receiverGainMultiplier();
 }
 
 /**
@@ -355,6 +389,7 @@ export async function stopStream() {
 	_reconnectAttempt = 0;
 	// Cancel must not wait on in-flight work: during unlock/load there may be no `_sound` yet, but
 	// `_attemptInFlight` is already true — the old early-return left the panel stuck until awaits finished.
+	clearSlowFetchUiState();
 	_attemptInFlight = false;
 	disposeSound();
 	notifyPanel();
@@ -390,7 +425,7 @@ export function onSettingsAffectingPlayback() {
 }
 
 /**
- * @returns {{ playing: boolean, reconnecting: boolean, busy: boolean, wantsPlayback: boolean, url: string }}
+ * @returns {{ playing: boolean, reconnecting: boolean, busy: boolean, wantsPlayback: boolean, url: string, showSlowFetchHint: boolean }}
  */
 export function getPlaybackState() {
 	const playing = Boolean(_sound?.playing);
@@ -400,6 +435,7 @@ export function getPlaybackState() {
 		playing,
 		reconnecting,
 		busy: _attemptInFlight,
+		showSlowFetchHint: _showSlowFetchHint,
 		wantsPlayback: _userWantsPlayback,
 		url: getEffectiveStreamUrl(),
 	};

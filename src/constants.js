@@ -4,8 +4,8 @@ export const MODULE_ID = "foundry-audio-receiver";
 /** World + user setting keys */
 export const SETTINGS = {
 	streamUrl: "streamUrl",
-	/** @type {'http' | 'shout'} Placeholder: same playback path today; SHOUT may need headers/metadata later */
-	streamFormat: "streamFormat",
+	/** World: multiplies the Stream volume slider (Web Audio gain). Default matches former HTTP ×2 behaviour. */
+	streamGainMultiplier: "streamGainMultiplier",
 	followGmStream: "followGmStream",
 	customStreamUrl: "customStreamUrl",
 	receiverVolume: "receiverVolume",
@@ -13,13 +13,15 @@ export const SETTINGS = {
 	autoPlayOnReady: "autoPlayOnReady",
 };
 
-/** @type {const} */
-export const STREAM_FORMAT = {
-	HTTP: "http",
-	SHOUT: "shout",
+/** Default world gain multiplier when the setting is missing (matches old fixed ×2 boost). */
+export const DEFAULT_STREAM_GAIN_MULTIPLIER = 2;
+
+/** Clamp for `streamGainMultiplier` world setting. */
+export const STREAM_GAIN_MULTIPLIER_RANGE = {
+	min: 0.25,
+	max: 4,
+	step: 0.25,
 };
 
-/**
- * Extra Web Audio gain for **HTTP** streams only (e.g. SWYH tends to be quiet). SHOUT uses 1×.
- */
-export const HTTP_STREAM_GAIN_MULTIPLIER = 2;
+/** After this many ms stuck loading, show orange hint (source may be silent, not unreachable). */
+export const SLOW_FETCH_HINT_MS = 10_000;

@@ -21,7 +21,7 @@ const PANEL_ID = `${MODULE_ID}-playlist-panel`;
 function syncPanelState(root) {
 	const useGlobal = Boolean(game.settings.get(MODULE_ID, SETTINGS.followGmStream));
 	const customUrl = String(game.settings.get(MODULE_ID, SETTINGS.customStreamUrl) ?? "");
-	const { playing, reconnecting, busy } = getPlaybackState();
+	const { playing, reconnecting, busy, showSlowFetchHint } = getPlaybackState();
 	const waitingForStream = reconnecting || busy;
 
 	const globalEl = root.querySelector('input[name="far-use-global-stream"]');
@@ -48,6 +48,17 @@ function syncPanelState(root) {
 		},
 		t,
 	);
+
+	const hintEl = root.querySelector(".far-slow-fetch-hint");
+	if (hintEl instanceof HTMLElement) {
+		if (showSlowFetchHint) {
+			hintEl.hidden = false;
+			hintEl.textContent = t("panel.slowFetchHint");
+		} else {
+			hintEl.hidden = true;
+			hintEl.textContent = "";
+		}
+	}
 }
 
 /**
@@ -104,7 +115,7 @@ function bindPanel(root) {
 		const open = root.classList.contains("expanded");
 		header?.setAttribute("aria-expanded", String(open));
 		if (expandIcon) {
-			expandIcon.className = open ? "expand fa-solid fa-angle-up" : "expand fa-solid fa-angle-down";
+			expandIcon.className = open ? "expand fa-solid fa-angle-down" : "expand fa-solid fa-angle-up";
 			expandIcon.setAttribute("inert", "");
 		}
 	}

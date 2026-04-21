@@ -1,4 +1,4 @@
-import { MODULE_ID, SETTINGS, STREAM_FORMAT } from "./constants.js";
+import { MODULE_ID, SETTINGS, STREAM_GAIN_MULTIPLIER_RANGE, DEFAULT_STREAM_GAIN_MULTIPLIER } from "./constants.js";
 import { t } from "./i18n.js";
 import { onSettingsAffectingPlayback } from "./stream-player.js";
 
@@ -13,17 +13,18 @@ export function registerModuleSettings() {
 		onChange: () => onSettingsAffectingPlayback(),
 	});
 
-	game.settings.register(MODULE_ID, SETTINGS.streamFormat, {
-		name: t("settings.streamFormat.name"),
-		hint: t("settings.streamFormat.hint"),
+	game.settings.register(MODULE_ID, SETTINGS.streamGainMultiplier, {
+		name: t("settings.streamGainMultiplier.name"),
+		hint: t("settings.streamGainMultiplier.hint"),
 		scope: "world",
 		config: true,
-		type: String,
-		choices: {
-			[STREAM_FORMAT.HTTP]: t("settings.streamFormat.http"),
-			[STREAM_FORMAT.SHOUT]: t("settings.streamFormat.shout"),
+		type: Number,
+		range: {
+			min: STREAM_GAIN_MULTIPLIER_RANGE.min,
+			max: STREAM_GAIN_MULTIPLIER_RANGE.max,
+			step: STREAM_GAIN_MULTIPLIER_RANGE.step,
 		},
-		default: STREAM_FORMAT.HTTP,
+		default: DEFAULT_STREAM_GAIN_MULTIPLIER,
 		onChange: () => onSettingsAffectingPlayback(),
 	});
 
